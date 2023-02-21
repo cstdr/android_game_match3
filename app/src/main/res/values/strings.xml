@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">GameMatch3</string>
+    <string name="game_title">消消乐</string>
+    <string name="time_title">时间还剩 :</string>
+    <string name="time_number">00:00</string>
+    <string name="score_title">分数 :</string>
+    <string name="score_number">0</string>
+
+    <string-array name="persons_name">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
+
+
+    <string-array name="persons">
+        <item>@drawable/person1</item>
+        <item>@drawable/person2</item>
+        <item>@drawable/person3</item>
+        <item>@drawable/person4</item>
+        <item>@drawable/person5</item>
+        <item>@drawable/person6</item>
+        <item>@drawable/person7</item>
+    </string-array>
 </resources>
