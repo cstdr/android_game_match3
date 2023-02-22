@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GameMatch3</string>
+    <string name="app_name">狂飙坏蛋消消乐</string>
     <string name="game_title">消消乐</string>
     <string name="time_title">时间还剩 :</string>
     <string name="time_number">00:00</string>
