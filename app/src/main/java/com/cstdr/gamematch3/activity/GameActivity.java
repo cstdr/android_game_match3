@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -39,6 +42,9 @@ public class GameActivity extends AppCompatActivity {
     private int mFirstClickedItemId = -1;
     private String[] mPersonNameList;
     private TypedArray mPersonImageArray;
+    private Animation showAnimation;
+    private Animation hideAnimation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +52,7 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         initView();
+        initAnimation();
         initData();
 
         resetUI();
@@ -58,11 +65,25 @@ public class GameActivity extends AppCompatActivity {
         mGlGameBoard.setRowCount(Constant.GAME_ITEM_COLUMN_COUNT);
     }
 
+    private void initAnimation() {
+        showAnimation = new AlphaAnimation(0, 1);
+        showAnimation.setDuration(500);
+        showAnimation.setFillAfter(true);
+        showAnimation.setFillBefore(false);
+
+        hideAnimation = new AlphaAnimation(1, 0);
+        hideAnimation.setDuration(500);
+        hideAnimation.setFillAfter(false);
+        hideAnimation.setFillBefore(true);
+    }
+
 
     private void initData() {
         mListGameItems = new ArrayList<GameItem>();
         mPersonNameList = getResources().getStringArray(R.array.persons_name);
         mPersonImageArray = getResources().obtainTypedArray(R.array.persons);
+
+        mListItemLayouts = new ArrayList<RelativeLayout>();
     }
 
     private void setOnClick(ImageView imageView) {
@@ -79,10 +100,13 @@ public class GameActivity extends AppCompatActivity {
                     v.setBackgroundResource(com.qmuiteam.qmui.R.color.qmui_config_color_gray_9);
                     return;
                 } else {
-//                    GameItem firstGameItem = mListGameItems.get(mFirstClickedItemId);
-//                    GameItem secondGameItem = mListGameItems.get(id);
+                    resetUISwapShow(false, mFirstClickedItemId, id);
 
                     Collections.swap(mListGameItems, mFirstClickedItemId, id);
+                    resetUI();
+
+                    resetUISwapShow(true, mFirstClickedItemId, id);
+
                     MatchUtil.startMatch(mListGameItems, mFirstClickedItemId, id);
 
                     resetUI();
@@ -90,6 +114,20 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void resetUISwapShow(boolean isShow, int from, int to) {
+        RelativeLayout fromLayout = mListItemLayouts.get(from);
+        RelativeLayout toLayout = mListItemLayouts.get(to);
+
+        if (isShow) {
+            fromLayout.startAnimation(showAnimation);
+            toLayout.startAnimation(showAnimation);
+        } else {
+            fromLayout.startAnimation(hideAnimation);
+            toLayout.startAnimation(hideAnimation);
+        }
+
     }
 
     private GameItem newGameItem() {
@@ -103,6 +141,7 @@ public class GameActivity extends AppCompatActivity {
      */
     private void resetUI() {
         mGlGameBoard.removeAllViews();
+        mListItemLayouts.clear();
 
         int size = mListGameItems.size();
         Log.d(TAG, "resetUI: size = " + size);
@@ -124,11 +163,13 @@ public class GameActivity extends AppCompatActivity {
 
             setOnClick(imageView);
             mGlGameBoard.addView(layout);
+            mListItemLayouts.add(layout);
         }
 
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(mGlGameBoard.getLayoutParams());
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         mGlGameBoard.setLayoutParams(layoutParams);
+
 
     }
 
