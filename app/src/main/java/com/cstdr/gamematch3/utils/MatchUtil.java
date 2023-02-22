@@ -76,7 +76,7 @@ public class MatchUtil {
     private static boolean checkMatch(List<GameItem> list, int i, int direction, List<Integer> matchedCountList) {
         Log.d(TAG, "checkMatch: ========");
         // 向左匹配，位置只能从最右一列开始
-        if (direction == -1 && ((i + direction) % Constant.GAME_ITEM_COLUMN_COUNT == (Constant.GAME_ITEM_COLUMN_COUNT - 1))) {
+        if ((i + direction) < 0 || (direction == -1 && ((i + direction) % Constant.GAME_ITEM_COLUMN_COUNT == (Constant.GAME_ITEM_COLUMN_COUNT - 1)))) {
             return false;
         }
         // 向右匹配，位置只能从最左一列开始
