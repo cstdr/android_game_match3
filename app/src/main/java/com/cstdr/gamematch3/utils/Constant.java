@@ -16,4 +16,13 @@ public interface Constant {
      * 游戏项的种类有多少种
      */
     int GAME_ITEM_TYPE_COUNT = 7;
+
+    int GAME_ITEM_TYPE_0 = 0;
+    int GAME_ITEM_TYPE_1 = 1;
+    int GAME_ITEM_TYPE_2 = 2;
+    int GAME_ITEM_TYPE_3 = 3;
+    int GAME_ITEM_TYPE_4 = 4;
+    int GAME_ITEM_TYPE_5 = 5;
+    int GAME_ITEM_TYPE_6 = 6;
+
 }

@@ -9,8 +9,11 @@ public class GameItem {
     private int personId;
     private String personName;
 
-    public GameItem(int personId, String personName, int image) {
+    private int type;
+
+    public GameItem(int personId, int type, String personName, int image) {
         this.personName = personName;
+        this.type = type;
         this.image = image;
         this.personId = personId;
     }
@@ -19,13 +22,14 @@ public class GameItem {
         return image;
     }
 
-    public int getPersonId() {
-        return personId;
-    }
+//    public int getPersonId() {
+//        return personId;
+//    }
 
     public String getPersonName() {
         return personName;
     }
+
 
     @Override
     public String toString() {
@@ -33,6 +37,11 @@ public class GameItem {
                 "image=" + image +
                 ", personId=" + personId +
                 ", personName='" + personName + '\'' +
+                ", type=" + type +
                 '}';
+    }
+
+    public int getType() {
+        return type;
     }
 }
