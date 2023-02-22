@@ -15,31 +15,34 @@ import android.view.animation.Animation;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.cstdr.gamematch3.R;
-import com.cstdr.gamematch3.adapter.GameItemAdapter;
 import com.cstdr.gamematch3.model.GameItem;
 import com.cstdr.gamematch3.utils.Constant;
+import com.cstdr.gamematch3.utils.MMKVUtil;
 import com.cstdr.gamematch3.utils.MatchUtil;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.tencent.mmkv.MMKV;
+
+import org.w3c.dom.Text;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 public class GameActivity extends AppCompatActivity {
 
     private static final String TAG = GameActivity.class.getSimpleName();
     private GridLayout mGlGameBoard;
 
+    private TextView mTvScoreNumber;
+
     private List<GameItem> mListGameItems;
     private List<RelativeLayout> mListItemLayouts;
     private List<Integer> mNeedAnimLayoutIdList;
     private List<Integer> mNewItemLayoutIdList;
-
-    private GameItemAdapter mAdapter;
 
     private int mFirstClickedItemId = -1;
     private String[] mPersonNameList;
@@ -59,9 +62,23 @@ public class GameActivity extends AppCompatActivity {
                 setNeedAnimIds(needMatchedList);
                 startAnim(false);
 
+                Message message = new Message();
+                message.arg1 = needMatchedList.size();
+                scoreHandler.sendMessage(message);
+
                 resetUIHandler.sendEmptyMessageDelayed(0, 500);
             }
             return true;
+        }
+    });
+
+    private Handler scoreHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            int score = msg.arg1;
+            MMKVUtil.GAME_SCORE_NUMBER += score * MMKVUtil.GAME_SCORE_TIMES;
+            mTvScoreNumber.setText(String.format("%d", MMKVUtil.GAME_SCORE_NUMBER));
+            return false;
         }
     });
 
@@ -76,6 +93,8 @@ public class GameActivity extends AppCompatActivity {
 
         resetUI();
         startNewItemAnim(true);
+
+        resetUIHandler.sendEmptyMessageDelayed(0, 500);
     }
 
 
@@ -83,6 +102,8 @@ public class GameActivity extends AppCompatActivity {
         mGlGameBoard = findViewById(R.id.gl_game);
         mGlGameBoard.setColumnCount(Constant.GAME_ITEM_COLUMN_COUNT);
         mGlGameBoard.setRowCount(Constant.GAME_ITEM_COLUMN_COUNT);
+
+        mTvScoreNumber = findViewById(R.id.tv_score_number);
     }
 
     private void initAnimation() {
@@ -106,6 +127,8 @@ public class GameActivity extends AppCompatActivity {
         mListItemLayouts = new ArrayList<RelativeLayout>();
         mNeedAnimLayoutIdList = new ArrayList<Integer>();
         mNewItemLayoutIdList = new ArrayList<Integer>();
+
+//        mTvScoreNumber.setText(String.format("%d", MMKVUtil.GAME_SCORE_NUMBER));
     }
 
     private void setOnClick(ImageView imageView) {
@@ -139,6 +162,10 @@ public class GameActivity extends AppCompatActivity {
                     List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, itemIdList);
                     setNeedAnimIds(needMatchedList);
                     startAnim(false);
+
+                    Message message = new Message();
+                    message.arg1 = needMatchedList.size();
+                    scoreHandler.sendMessage(message);
 
                     resetUIHandler.sendEmptyMessageDelayed(0, 500);
 
@@ -248,5 +275,9 @@ public class GameActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mPersonImageArray.recycle();
+        if (MMKVUtil.GAME_SCORE_NUMBER > MMKVUtil.GAME_HIGHEST_SCORE_NUMBER) {
+            MMKVUtil.GAME_HIGHEST_SCORE_NUMBER = MMKVUtil.GAME_SCORE_NUMBER;
+        }
+        MMKV.defaultMMKV().putInt(MMKVUtil.KEY_GAME_HIGHEST_SCORE_NUMBER, MMKVUtil.GAME_HIGHEST_SCORE_NUMBER);
     }
 }
