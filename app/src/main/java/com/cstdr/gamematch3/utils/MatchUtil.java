@@ -18,7 +18,7 @@ public class MatchUtil {
      * @param from 点击的图标
      * @param to   点击的图标
      */
-    public static void startMatch(List<GameItem> list, int from, int to) {
+    public static List<Integer> startMatch(List<GameItem> list, int from, int to) {
         // 最终匹配到需要执行三消到图标列表
         List<Integer> needMatchedList = new ArrayList<Integer>();
 
@@ -28,7 +28,9 @@ public class MatchUtil {
         if (needMatchedList.size() >= 3) {
             removeMatch(list, needMatchedList);
         }
-        needMatchedList.clear();
+//        needMatchedList.clear();
+
+        return needMatchedList;
     }
 
     private static void doMatch(List<GameItem> list, List<Integer> needMatchedList, int itemId) {

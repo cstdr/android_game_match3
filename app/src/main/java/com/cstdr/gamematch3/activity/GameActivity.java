@@ -5,6 +5,7 @@ import androidx.core.math.MathUtils;
 
 import android.content.res.TypedArray;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -44,6 +46,12 @@ public class GameActivity extends AppCompatActivity {
     private TypedArray mPersonImageArray;
     private Animation showAnimation;
     private Animation hideAnimation;
+
+    private Executor executor = new Executor() {
+        @Override
+        public void execute(Runnable command) {
+        }
+    };
 
 
     @Override
@@ -94,38 +102,46 @@ public class GameActivity extends AppCompatActivity {
                 Log.d(TAG, "onClick: id = " + id);
 
                 // 如果第一次是这个id，或者刚三消后，则把这次设为第一次点击
-                if (mFirstClickedItemId == id || mFirstClickedItemId == -1) {
+                if (mFirstClickedItemId == -1) {
                     mFirstClickedItemId = id;
                     // TODO 替换掉这个底色
                     v.setBackgroundResource(com.qmuiteam.qmui.R.color.qmui_config_color_gray_9);
                     return;
                 } else {
-                    resetUISwapShow(false, mFirstClickedItemId, id);
+                    startAnim(false, mFirstClickedItemId);
+                    startAnim(false, id);
 
                     Collections.swap(mListGameItems, mFirstClickedItemId, id);
                     resetUI();
 
-                    resetUISwapShow(true, mFirstClickedItemId, id);
+                    startAnim(true, mFirstClickedItemId);
+                    startAnim(true, id);
 
-                    MatchUtil.startMatch(mListGameItems, mFirstClickedItemId, id);
+                    List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, mFirstClickedItemId, id);
+                    for (int i = 0; i < needMatchedList.size(); i++) {
+                        int needId = needMatchedList.get(i);
+                        startAnim(false, needId);
+                    }
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            resetUI();
+                        }
+                    }, 500);
 
-                    resetUI();
                     resetClickedItemId();
                 }
             }
         });
     }
 
-    private void resetUISwapShow(boolean isShow, int from, int to) {
-        RelativeLayout fromLayout = mListItemLayouts.get(from);
-        RelativeLayout toLayout = mListItemLayouts.get(to);
+    private void startAnim(boolean isShow, int id) {
+        RelativeLayout layout = mListItemLayouts.get(id);
 
         if (isShow) {
-            fromLayout.startAnimation(showAnimation);
-            toLayout.startAnimation(showAnimation);
+            layout.startAnimation(showAnimation);
         } else {
-            fromLayout.startAnimation(hideAnimation);
-            toLayout.startAnimation(hideAnimation);
+            layout.startAnimation(hideAnimation);
         }
 
     }
@@ -137,6 +153,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /**
+     * TODO 简化逻辑，只更新需要更新的图标，使用mGlGameBoard.removeViewAt(index);
      * 重新绘制游戏画板
      */
     private void resetUI() {
