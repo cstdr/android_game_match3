@@ -35,6 +35,7 @@ public class GameActivity extends AppCompatActivity {
     private List<GameItem> mListGameItems;
     private List<RelativeLayout> mListItemLayouts;
     private List<Integer> mNeedAnimLayoutIdList;
+    private List<Integer> mNewItemLayoutIdList;
 
     private GameItemAdapter mAdapter;
 
@@ -43,13 +44,6 @@ public class GameActivity extends AppCompatActivity {
     private TypedArray mPersonImageArray;
     private Animation showAnimation;
     private Animation hideAnimation;
-
-    private Executor executor = new Executor() {
-        @Override
-        public void execute(Runnable command) {
-        }
-    };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +55,7 @@ public class GameActivity extends AppCompatActivity {
         initData();
 
         resetUI();
+        startNewItemAnim(true);
     }
 
 
@@ -90,6 +85,7 @@ public class GameActivity extends AppCompatActivity {
 
         mListItemLayouts = new ArrayList<RelativeLayout>();
         mNeedAnimLayoutIdList = new ArrayList<Integer>();
+        mNewItemLayoutIdList = new ArrayList<Integer>();
     }
 
     private void setOnClick(ImageView imageView) {
@@ -115,9 +111,9 @@ public class GameActivity extends AppCompatActivity {
                     Collections.swap(mListGameItems, mFirstClickedItemId, id);
                     resetUI();
 
-                    setNeedAnimId(mFirstClickedItemId);
-                    setNeedAnimId(id);
-                    startAnim(true);
+//                    setNeedAnimId(mFirstClickedItemId);
+//                    setNeedAnimId(id);
+//                    startAnim(true);
 
                     List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, mFirstClickedItemId, id);
                     setNeedAnimIds(needMatchedList);
@@ -127,6 +123,8 @@ public class GameActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             resetUI();
+                            // 三消后，新添加的图标动画显示入场
+                            startNewItemAnim(true);
                         }
                     }, 500);
 
@@ -148,6 +146,7 @@ public class GameActivity extends AppCompatActivity {
         for (int i = 0; i < mNeedAnimLayoutIdList.size(); i++) {
             int id = mNeedAnimLayoutIdList.get(i);
             RelativeLayout layout = mListItemLayouts.get(id);
+            layout.clearAnimation();
             if (isShow) {
                 layout.startAnimation(showAnimation);
             } else {
@@ -155,6 +154,24 @@ public class GameActivity extends AppCompatActivity {
             }
         }
         mNeedAnimLayoutIdList.clear();
+    }
+
+    private void setNewItemLayoutId(int id) {
+        mNewItemLayoutIdList.add(id);
+    }
+
+    private void startNewItemAnim(boolean isShow) {
+        for (int i = 0; i < mNewItemLayoutIdList.size(); i++) {
+            int id = mNewItemLayoutIdList.get(i);
+            RelativeLayout layout = mListItemLayouts.get(id);
+            layout.clearAnimation();
+            if (isShow) {
+                layout.startAnimation(showAnimation);
+            } else {
+                layout.startAnimation(hideAnimation);
+            }
+        }
+        mNewItemLayoutIdList.clear();
     }
 
     private GameItem newGameItem() {
@@ -178,6 +195,9 @@ public class GameActivity extends AppCompatActivity {
             if (i >= size) {
                 gameItem = newGameItem();
                 mListGameItems.add(gameItem);
+
+                // 添加需要加载显示动画的id
+                setNewItemLayoutId(i);
             } else {
                 gameItem = mListGameItems.get(i);
             }
@@ -197,7 +217,6 @@ public class GameActivity extends AppCompatActivity {
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(mGlGameBoard.getLayoutParams());
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         mGlGameBoard.setLayoutParams(layoutParams);
-
 
     }
 
