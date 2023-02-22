@@ -1,6 +1,7 @@
 package com.cstdr.gamematch3.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.math.MathUtils;
 
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -16,8 +17,12 @@ import com.cstdr.gamematch3.adapter.GameItemAdapter;
 import com.cstdr.gamematch3.model.GameItem;
 import com.cstdr.gamematch3.utils.Constant;
 import com.cstdr.gamematch3.utils.MatchUtil;
+import com.qmuiteam.qmui.QMUIConfig;
+import com.qmuiteam.qmui.util.QMUIDeviceHelper;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.util.QMUINotchHelper;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -87,6 +92,12 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    private GameItem newGameItem() {
+        SecureRandom sr = new SecureRandom();
+        int i = sr.nextInt(Constant.GAME_ITEM_TYPE_COUNT);
+        return new GameItem(i, mPersonNameList[i], mPersonImageArray.getResourceId(i, 0));
+    }
+
     /**
      * 重新绘制游戏画板
      */
@@ -95,12 +106,10 @@ public class GameActivity extends AppCompatActivity {
 
         int size = mListGameItems.size();
         Log.d(TAG, "resetUI: size = " + size);
-        int j = 0;
         for (int i = 0; i < Constant.GAME_ITEM_COLUMN_COUNT * Constant.GAME_ITEM_COLUMN_COUNT; i++) {
             GameItem gameItem;
             if (i >= size) {
-                j = i % Constant.GAME_ITEM_TYPE_COUNT;
-                gameItem = new GameItem(i, j, mPersonNameList[j], mPersonImageArray.getResourceId(j, 0));
+                gameItem = newGameItem();
                 mListGameItems.add(gameItem);
             } else {
                 gameItem = mListGameItems.get(i);

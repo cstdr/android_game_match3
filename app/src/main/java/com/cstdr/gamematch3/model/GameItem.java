@@ -6,25 +6,19 @@ package com.cstdr.gamematch3.model;
 public class GameItem {
 
     private int image;
-    private int personId;
     private String personName;
 
     private int type;
 
-    public GameItem(int personId, int type, String personName, int image) {
+    public GameItem(int type, String personName, int image) {
         this.personName = personName;
         this.type = type;
         this.image = image;
-        this.personId = personId;
     }
 
     public int getImage() {
         return image;
     }
-
-//    public int getPersonId() {
-//        return personId;
-//    }
 
     public String getPersonName() {
         return personName;
@@ -35,7 +29,6 @@ public class GameItem {
     public String toString() {
         return "GameItem{" +
                 "image=" + image +
-                ", personId=" + personId +
                 ", personName='" + personName + '\'' +
                 ", type=" + type +
                 '}';
