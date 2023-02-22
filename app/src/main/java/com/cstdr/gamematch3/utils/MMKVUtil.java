@@ -5,6 +5,7 @@ public class MMKVUtil {
     // key=====================
 
     public static final String KEY_GAME_HIGHEST_SCORE_NUMBER = "KEY_GAME_HIGHEST_SCORE_NUMBER";
+    public static final String KEY_MODE = "KEY_MODE";
 
 
     // value=====================
@@ -14,5 +15,8 @@ public class MMKVUtil {
 
     public static final int GAME_SCORE_TIMES = 1;
 
+    public static final int MODE_TIME = 0;
+    public static final int MODE_TIME_COUNTDOWN = 120;
+    public static final int MODE_INFINITE = 1;
 
 }

@@ -3,6 +3,8 @@ package com.cstdr.gamematch3.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -20,24 +23,33 @@ import android.widget.TextView;
 import com.cstdr.gamematch3.R;
 import com.cstdr.gamematch3.model.GameItem;
 import com.cstdr.gamematch3.utils.Constant;
+import com.cstdr.gamematch3.utils.DialogUtil;
 import com.cstdr.gamematch3.utils.MMKVUtil;
 import com.cstdr.gamematch3.utils.MatchUtil;
+import com.cstdr.gamematch3.utils.TimeUtil;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.widget.dialog.QMUIBaseDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogBuilder;
 import com.tencent.mmkv.MMKV;
 
 import org.w3c.dom.Text;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
 public class GameActivity extends AppCompatActivity {
 
     private static final String TAG = GameActivity.class.getSimpleName();
+
+    private Context mContext;
     private GridLayout mGlGameBoard;
 
     private TextView mTvScoreNumber;
+    private TextView mTvTimeNumber;
 
     private List<GameItem> mListGameItems;
     private List<RelativeLayout> mListItemLayouts;
@@ -49,6 +61,8 @@ public class GameActivity extends AppCompatActivity {
     private TypedArray mPersonImageArray;
     private Animation showAnimation;
     private Animation hideAnimation;
+
+    private int mCountdown;
 
     private Handler resetUIHandler = new Handler(new Handler.Callback() {
         @Override
@@ -82,19 +96,75 @@ public class GameActivity extends AppCompatActivity {
         }
     });
 
+    private Handler countdownHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if (msg.what == 1) {
+                mCountdown = MMKVUtil.MODE_TIME_COUNTDOWN;
+            }
+            mCountdown--;
+            String timeStr = TimeUtil.getTimeStr(mCountdown);
+            mTvTimeNumber.setText(timeStr);
+            if (mCountdown <= 0) {
+                if (MMKVUtil.GAME_SCORE_NUMBER > MMKVUtil.GAME_HIGHEST_SCORE_NUMBER) {
+                    MMKVUtil.GAME_HIGHEST_SCORE_NUMBER = MMKVUtil.GAME_SCORE_NUMBER;
+                }
+                DialogUtil.showGameoverDialog(mContext, gameoverHandler);
+                return true;
+            } else {
+                countdownHandler.sendEmptyMessageDelayed(0, 1000);
+            }
+            return true;
+        }
+    });
+
+    private Handler gameoverHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            MMKVUtil.GAME_SCORE_NUMBER = 0;
+
+            if (msg.what == 0) { // 重新开始
+                countdownHandler.sendEmptyMessageDelayed(1, 1000);
+                mTvScoreNumber.setText(String.format("%d", MMKVUtil.GAME_SCORE_NUMBER));
+            } else if (msg.what == 1) { // 下次再玩
+                finish();
+            }
+            return true;
+        }
+    });
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+        mContext = this;
 
         initView();
         initAnimation();
         initData();
 
+        initMode();
+
         resetUI();
         startNewItemAnim(true);
 
         resetUIHandler.sendEmptyMessageDelayed(0, 500);
+    }
+
+    private void initMode() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            int mode = intent.getIntExtra(MMKVUtil.KEY_MODE, 0);
+            if (mode == MMKVUtil.MODE_TIME) {
+                mCountdown = MMKVUtil.MODE_TIME_COUNTDOWN;
+                countdownHandler.sendEmptyMessage(0);
+
+            } else if (mode == MMKVUtil.MODE_INFINITE) {
+                mTvTimeNumber.setText("无限模式");
+            }
+        }
+
     }
 
 
@@ -104,6 +174,8 @@ public class GameActivity extends AppCompatActivity {
         mGlGameBoard.setRowCount(Constant.GAME_ITEM_COLUMN_COUNT);
 
         mTvScoreNumber = findViewById(R.id.tv_score_number);
+        mTvTimeNumber = findViewById(R.id.tv_time_number);
+
     }
 
     private void initAnimation() {
