@@ -1,10 +1,12 @@
 package com.cstdr.gamematch3.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +46,24 @@ public class GameActivity extends AppCompatActivity {
     private TypedArray mPersonImageArray;
     private Animation showAnimation;
     private Animation hideAnimation;
+
+    private Handler resetUIHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            resetUI();
+            // 三消后，新添加的图标动画显示入场
+            startNewItemAnim(true);
+
+            List<Integer> needMatchedList = MatchUtil.startMatchAll(mListGameItems);
+            if (needMatchedList.size() > 0) {
+                setNeedAnimIds(needMatchedList);
+                startAnim(false);
+
+                resetUIHandler.sendEmptyMessageDelayed(0, 500);
+            }
+            return true;
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,8 +122,6 @@ public class GameActivity extends AppCompatActivity {
                     v.setBackgroundResource(com.qmuiteam.qmui.R.color.qmui_config_color_gray_9);
                     return;
                 } else {
-
-
                     setNeedAnimId(mFirstClickedItemId);
                     setNeedAnimId(id);
                     startAnim(false);
@@ -115,18 +133,14 @@ public class GameActivity extends AppCompatActivity {
 //                    setNeedAnimId(id);
 //                    startAnim(true);
 
-                    List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, mFirstClickedItemId, id);
+                    List<Integer> itemIdList = new ArrayList<Integer>();
+                    itemIdList.add(mFirstClickedItemId);
+                    itemIdList.add(id);
+                    List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, itemIdList);
                     setNeedAnimIds(needMatchedList);
                     startAnim(false);
 
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            resetUI();
-                            // 三消后，新添加的图标动画显示入场
-                            startNewItemAnim(true);
-                        }
-                    }, 500);
+                    resetUIHandler.sendEmptyMessageDelayed(0, 500);
 
                     resetClickedItemId();
                 }
