@@ -1,7 +1,6 @@
 package com.cstdr.gamematch3.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.math.MathUtils;
 
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -21,10 +19,7 @@ import com.cstdr.gamematch3.adapter.GameItemAdapter;
 import com.cstdr.gamematch3.model.GameItem;
 import com.cstdr.gamematch3.utils.Constant;
 import com.cstdr.gamematch3.utils.MatchUtil;
-import com.qmuiteam.qmui.QMUIConfig;
-import com.qmuiteam.qmui.util.QMUIDeviceHelper;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
-import com.qmuiteam.qmui.util.QMUINotchHelper;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -39,6 +34,8 @@ public class GameActivity extends AppCompatActivity {
 
     private List<GameItem> mListGameItems;
     private List<RelativeLayout> mListItemLayouts;
+    private List<Integer> mNeedAnimLayoutIdList;
+
     private GameItemAdapter mAdapter;
 
     private int mFirstClickedItemId = -1;
@@ -92,6 +89,7 @@ public class GameActivity extends AppCompatActivity {
         mPersonImageArray = getResources().obtainTypedArray(R.array.persons);
 
         mListItemLayouts = new ArrayList<RelativeLayout>();
+        mNeedAnimLayoutIdList = new ArrayList<Integer>();
     }
 
     private void setOnClick(ImageView imageView) {
@@ -108,20 +106,23 @@ public class GameActivity extends AppCompatActivity {
                     v.setBackgroundResource(com.qmuiteam.qmui.R.color.qmui_config_color_gray_9);
                     return;
                 } else {
-                    startAnim(false, mFirstClickedItemId);
-                    startAnim(false, id);
+
+
+                    setNeedAnimId(mFirstClickedItemId);
+                    setNeedAnimId(id);
+                    startAnim(false);
 
                     Collections.swap(mListGameItems, mFirstClickedItemId, id);
                     resetUI();
 
-                    startAnim(true, mFirstClickedItemId);
-                    startAnim(true, id);
+                    setNeedAnimId(mFirstClickedItemId);
+                    setNeedAnimId(id);
+                    startAnim(true);
 
                     List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, mFirstClickedItemId, id);
-                    for (int i = 0; i < needMatchedList.size(); i++) {
-                        int needId = needMatchedList.get(i);
-                        startAnim(false, needId);
-                    }
+                    setNeedAnimIds(needMatchedList);
+                    startAnim(false);
+
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -135,15 +136,25 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
-    private void startAnim(boolean isShow, int id) {
-        RelativeLayout layout = mListItemLayouts.get(id);
+    private void setNeedAnimId(int id) {
+        mNeedAnimLayoutIdList.add(id);
+    }
 
-        if (isShow) {
-            layout.startAnimation(showAnimation);
-        } else {
-            layout.startAnimation(hideAnimation);
+    private void setNeedAnimIds(List<Integer> ids) {
+        mNeedAnimLayoutIdList.addAll(ids);
+    }
+
+    private void startAnim(boolean isShow) {
+        for (int i = 0; i < mNeedAnimLayoutIdList.size(); i++) {
+            int id = mNeedAnimLayoutIdList.get(i);
+            RelativeLayout layout = mListItemLayouts.get(id);
+            if (isShow) {
+                layout.startAnimation(showAnimation);
+            } else {
+                layout.startAnimation(hideAnimation);
+            }
         }
-
+        mNeedAnimLayoutIdList.clear();
     }
 
     private GameItem newGameItem() {
@@ -153,7 +164,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO 简化逻辑，只更新需要更新的图标，使用mGlGameBoard.removeViewAt(index);
+     * TODO 简化逻辑，只更新需要更新的图标，尝试使用mGlGameBoard.removeViewAt(index);
      * 重新绘制游戏画板
      */
     private void resetUI() {
