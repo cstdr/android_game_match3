@@ -224,16 +224,18 @@ public class GameActivity extends AppCompatActivity {
                     v.setBackgroundResource(R.color.orange);
                     return;
                 } else {
-                    setNeedAnimId(mFirstClickedItemId);
-                    setNeedAnimId(id);
-                    startAnim(false);
+
+                    // TODO 转换消失动画去掉后，不容易出现快速点击的误触问题
+//                    setNeedAnimId(mFirstClickedItemId);
+//                    setNeedAnimId(id);
+//                    startAnim(false);
 
                     Collections.swap(mListGameItems, mFirstClickedItemId, id);
                     resetUI();
 
-//                    setNeedAnimId(mFirstClickedItemId);
-//                    setNeedAnimId(id);
-//                    startAnim(true);
+                    setNeedAnimId(mFirstClickedItemId);
+                    setNeedAnimId(id);
+                    startAnim(true);
 
                     List<Integer> itemIdList = new ArrayList<Integer>();
                     itemIdList.add(mFirstClickedItemId);
@@ -328,8 +330,9 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO 简化逻辑，只更新需要更新的图标，尝试使用mGlGameBoard.removeViewAt(index);
-     * 重新绘制游戏画板
+     * TODO 重新绘制游戏画板
+     * 1、先把画板画好，只调整内部元素位置；
+     * 2、三消后元素下移到底部，顶部出现新元素；
      */
     private void resetUI() {
         mGlGameBoard.removeAllViews();
@@ -383,4 +386,48 @@ public class GameActivity extends AppCompatActivity {
         mPersonImageArray.recycle();
         clearGameData();
     }
+
+
+    //=========================
+
+
+    /**
+     * TODO 简化逻辑，只更新需要更新的图标，尝试使用mGlGameBoard.removeViewAt(index);
+     * 重新绘制游戏画板
+     */
+//    private void resetUI() {
+//        mGlGameBoard.removeAllViews();
+//        mListItemLayouts.clear();
+//
+//        int size = mListGameItems.size();
+//        Log.d(TAG, "resetUI: size = " + size);
+//        for (int i = 0; i < Constant.GAME_ITEM_COLUMN_COUNT * Constant.GAME_ITEM_COLUMN_COUNT; i++) {
+//            GameItem gameItem;
+//            if (i >= size) {
+//                gameItem = newGameItem();
+//                mListGameItems.add(gameItem);
+//
+//                // 添加需要加载显示动画的id
+//                setNewItemLayoutId(i);
+//            } else {
+//                gameItem = mListGameItems.get(i);
+//            }
+////            Log.d(TAG, "resetUI: gameItem = " + gameItem.toString());
+//            RelativeLayout layout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.item_person, null);
+//            int px = QMUIDisplayHelper.dp2px(this, Constant.GAME_ITEM_WIDTH);
+//            layout.setLayoutParams(new RelativeLayout.LayoutParams(px, px));
+//            ImageView imageView = layout.findViewById(R.id.iv_item);
+//            imageView.setImageResource(gameItem.getImage());
+//            imageView.setTag(i);
+//
+//            setOnClick(imageView);
+//            mGlGameBoard.addView(layout);
+//            mListItemLayouts.add(layout);
+//        }
+//
+//        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(mGlGameBoard.getLayoutParams());
+//        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+//        mGlGameBoard.setLayoutParams(layoutParams);
+//
+//    }
 }
