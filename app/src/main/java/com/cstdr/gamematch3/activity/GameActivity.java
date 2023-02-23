@@ -29,6 +29,7 @@ import com.cstdr.gamematch3.utils.Constant;
 import com.cstdr.gamematch3.utils.DialogUtil;
 import com.cstdr.gamematch3.utils.MMKVUtil;
 import com.cstdr.gamematch3.utils.MatchUtil;
+import com.cstdr.gamematch3.utils.SoundPoolUtil;
 import com.cstdr.gamematch3.utils.TimeUtil;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.dialog.QMUIBaseDialog;
@@ -93,8 +94,12 @@ public class GameActivity extends AppCompatActivity {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             int score = msg.arg1;
-            MMKVUtil.GAME_SCORE_NUMBER += score * MMKVUtil.GAME_SCORE_TIMES;
-            mTvScoreNumber.setText(String.format("%d", MMKVUtil.GAME_SCORE_NUMBER));
+            if (score > 0) {
+                MMKVUtil.GAME_SCORE_NUMBER += score * MMKVUtil.GAME_SCORE_TIMES;
+                mTvScoreNumber.setText(String.format("%d", MMKVUtil.GAME_SCORE_NUMBER));
+                // TODO 加分时发生音效
+                SoundPoolUtil.playExplode();
+            }
             return false;
         }
     });
@@ -111,8 +116,15 @@ public class GameActivity extends AppCompatActivity {
             if (mCountdown <= 0) {
                 if (MMKVUtil.GAME_SCORE_NUMBER > MMKVUtil.GAME_HIGHEST_SCORE_NUMBER) {
                     MMKVUtil.GAME_HIGHEST_SCORE_NUMBER = MMKVUtil.GAME_SCORE_NUMBER;
+
+                    // TODO 游戏结束时超过最高分发生音效
+                    SoundPoolUtil.playSuccess();
+                } else {
+                    // TODO 游戏结束时挑战失败发生音效
+                    SoundPoolUtil.playFail();
                 }
                 DialogUtil.showGameoverDialog(mContext, gameoverHandler);
+
                 return true;
             } else {
                 countdownHandler.sendEmptyMessageDelayed(0, 1000);
@@ -236,6 +248,7 @@ public class GameActivity extends AppCompatActivity {
                     setNeedAnimId(mFirstClickedItemId);
                     setNeedAnimId(id);
                     startAnim(true);
+
 
                     List<Integer> itemIdList = new ArrayList<Integer>();
                     itemIdList.add(mFirstClickedItemId);
@@ -374,6 +387,17 @@ public class GameActivity extends AppCompatActivity {
         mFirstClickedItemId = -1;
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        SoundPoolUtil.resumeAll();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SoundPoolUtil.pauseAll();
+    }
 
     @Override
     protected void onStop() {

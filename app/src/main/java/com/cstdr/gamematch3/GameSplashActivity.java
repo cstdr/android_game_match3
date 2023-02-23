@@ -10,6 +10,7 @@ import android.widget.Button;
 
 import com.cstdr.gamematch3.activity.GameActivity;
 import com.cstdr.gamematch3.utils.MMKVUtil;
+import com.cstdr.gamematch3.utils.SoundPoolUtil;
 
 public class GameSplashActivity extends AppCompatActivity {
 
@@ -45,5 +46,28 @@ public class GameSplashActivity extends AppCompatActivity {
             intent.putExtra(MMKVUtil.KEY_MODE, MMKVUtil.MODE_INFINITE);
             startActivity(intent);
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        SoundPoolUtil.resumeAll();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SoundPoolUtil.pauseAll();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SoundPoolUtil.release();
     }
 }
