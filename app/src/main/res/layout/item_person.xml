@@ -6,8 +6,8 @@
 
     <ImageView
         android:id="@+id/iv_item"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:scaleType="centerCrop"
         android:src="@mipmap/ic_launcher" />
 

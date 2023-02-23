@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
@@ -126,6 +128,7 @@ public class GameActivity extends AppCompatActivity {
             clearGameData();
 
             if (msg.what == 0) { // 重新开始
+                resetUIHandler.sendEmptyMessage(0);
                 countdownHandler.sendEmptyMessageDelayed(1, 1000);
                 mTvScoreNumber.setText(String.format("%d", MMKVUtil.GAME_SCORE_NUMBER));
             } else if (msg.what == 1) { // 下次再玩
@@ -151,7 +154,7 @@ public class GameActivity extends AppCompatActivity {
         resetUI();
         startNewItemAnim(true);
 
-        resetUIHandler.sendEmptyMessageDelayed(0, 500);
+        resetUIHandler.sendEmptyMessageDelayed(0, 200);
     }
 
     private void initMode() {
@@ -213,10 +216,12 @@ public class GameActivity extends AppCompatActivity {
                 Log.d(TAG, "onClick: id = " + id);
 
                 // 如果第一次是这个id，或者刚三消后，则把这次设为第一次点击
-                if (mFirstClickedItemId == -1) {
+                if (mFirstClickedItemId == -1 || mFirstClickedItemId == id) {
                     mFirstClickedItemId = id;
-                    // TODO 替换掉这个底色
-                    v.setBackgroundResource(com.qmuiteam.qmui.R.color.qmui_config_color_gray_9);
+                    // TODO 点击效果
+                    int reduceRange = QMUIDisplayHelper.dp2px(mContext, Constant.GAME_ITEM_IMAGEVIEW_WIDTH_REDUCE_RANGE);
+                    v.setPadding(reduceRange, reduceRange, reduceRange, reduceRange);
+                    v.setBackgroundResource(R.color.orange);
                     return;
                 } else {
                     setNeedAnimId(mFirstClickedItemId);
@@ -319,6 +324,7 @@ public class GameActivity extends AppCompatActivity {
         countdownHandler.removeMessages(0);
         scoreHandler.removeMessages(0);
 
+        mListGameItems.clear();
     }
 
     /**

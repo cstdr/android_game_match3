@@ -1,5 +1,7 @@
 package com.cstdr.gamematch3.utils;
 
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+
 public interface Constant {
 
     /**
@@ -24,5 +26,10 @@ public interface Constant {
     int GAME_ITEM_TYPE_4 = 4;
     int GAME_ITEM_TYPE_5 = 5;
     int GAME_ITEM_TYPE_6 = 6;
+
+    /**
+     * 游戏图标在被点击后缩小的宽度
+     */
+    int GAME_ITEM_IMAGEVIEW_WIDTH_REDUCE_RANGE = 5;
 
 }
