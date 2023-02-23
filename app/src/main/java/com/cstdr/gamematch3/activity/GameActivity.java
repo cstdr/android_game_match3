@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -121,7 +122,8 @@ public class GameActivity extends AppCompatActivity {
     private Handler gameoverHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
-            MMKVUtil.GAME_SCORE_NUMBER = 0;
+//            MMKVUtil.GAME_SCORE_NUMBER = 0;
+            clearGameData();
 
             if (msg.what == 0) { // 重新开始
                 countdownHandler.sendEmptyMessageDelayed(1, 1000);
@@ -293,6 +295,32 @@ public class GameActivity extends AppCompatActivity {
         return new GameItem(i, mPersonNameList[i], mPersonImageArray.getResourceId(i, 0));
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.d(TAG, "onKeyDown: ====keycode = " + keyCode);
+        Log.d(TAG, "onKeyDown: ====event = " + event.getKeyCode());
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            clearGameData();
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * 清除游戏数据
+     */
+    private void clearGameData() {
+        if (MMKVUtil.GAME_SCORE_NUMBER > MMKVUtil.GAME_HIGHEST_SCORE_NUMBER) {
+            MMKVUtil.GAME_HIGHEST_SCORE_NUMBER = MMKVUtil.GAME_SCORE_NUMBER;
+        }
+        MMKVUtil.GAME_SCORE_NUMBER = 0;
+        MMKV.defaultMMKV().putInt(MMKVUtil.KEY_GAME_HIGHEST_SCORE_NUMBER, MMKVUtil.GAME_HIGHEST_SCORE_NUMBER);
+
+        countdownHandler.removeMessages(0);
+        scoreHandler.removeMessages(0);
+
+    }
+
     /**
      * TODO 简化逻辑，只更新需要更新的图标，尝试使用mGlGameBoard.removeViewAt(index);
      * 重新绘制游戏画板
@@ -347,9 +375,6 @@ public class GameActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mPersonImageArray.recycle();
-        if (MMKVUtil.GAME_SCORE_NUMBER > MMKVUtil.GAME_HIGHEST_SCORE_NUMBER) {
-            MMKVUtil.GAME_HIGHEST_SCORE_NUMBER = MMKVUtil.GAME_SCORE_NUMBER;
-        }
-        MMKV.defaultMMKV().putInt(MMKVUtil.KEY_GAME_HIGHEST_SCORE_NUMBER, MMKVUtil.GAME_HIGHEST_SCORE_NUMBER);
+        clearGameData();
     }
 }
