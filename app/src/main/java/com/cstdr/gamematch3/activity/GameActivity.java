@@ -83,7 +83,7 @@ public class GameActivity extends AppCompatActivity {
                 message.arg1 = needMatchedList.size();
                 scoreHandler.sendMessage(message);
 
-                resetUIHandler.sendEmptyMessageDelayed(0, 500);
+                resetUIHandler.sendEmptyMessageDelayed(0, 200);
             }
             return true;
         }
@@ -185,12 +185,12 @@ public class GameActivity extends AppCompatActivity {
 
     private void initAnimation() {
         showAnimation = new AlphaAnimation(0, 1);
-        showAnimation.setDuration(500);
+        showAnimation.setDuration(200);
         showAnimation.setFillAfter(true);
         showAnimation.setFillBefore(false);
 
         hideAnimation = new AlphaAnimation(1, 0);
-        hideAnimation.setDuration(500);
+        hideAnimation.setDuration(200);
         hideAnimation.setFillAfter(false);
         hideAnimation.setFillBefore(true);
     }
@@ -246,7 +246,7 @@ public class GameActivity extends AppCompatActivity {
                     message.arg1 = needMatchedList.size();
                     scoreHandler.sendMessage(message);
 
-                    resetUIHandler.sendEmptyMessageDelayed(0, 500);
+                    resetUIHandler.sendEmptyMessageDelayed(0, 200);
 
                     resetClickedItemId();
                 }
