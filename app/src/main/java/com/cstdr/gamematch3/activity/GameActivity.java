@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,10 +13,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -29,19 +26,14 @@ import com.cstdr.gamematch3.utils.Constant;
 import com.cstdr.gamematch3.utils.DialogUtil;
 import com.cstdr.gamematch3.utils.MMKVUtil;
 import com.cstdr.gamematch3.utils.MatchUtil;
+import com.cstdr.gamematch3.utils.PositionUtil;
 import com.cstdr.gamematch3.utils.SoundPoolUtil;
 import com.cstdr.gamematch3.utils.TimeUtil;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
-import com.qmuiteam.qmui.widget.dialog.QMUIBaseDialog;
-import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
-import com.qmuiteam.qmui.widget.dialog.QMUIDialogBuilder;
 import com.tencent.mmkv.MMKV;
-
-import org.w3c.dom.Text;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -71,20 +63,27 @@ public class GameActivity extends AppCompatActivity {
     private Handler resetUIHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
-            resetUI();
-            // 三消后，新添加的图标动画显示入场
-            startNewItemAnim(true);
 
-            List<Integer> needMatchedList = MatchUtil.startMatchAll(mListGameItems);
-            if (needMatchedList.size() > 0) {
+            Log.d(TAG, "handleMessage: resetUIhandler =============");
+            resetUI();
+//            setNeedAnimIds(needMatchedList);
+
+//            // 三消后，新添加的图标动画显示入场
+//            startNewItemAnim(true);
+
+            List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, null);
+            Log.d(TAG, "handleMessage: needMatchedList = " + needMatchedList.size());
+            if (needMatchedList.size() >= 3) {
                 setNeedAnimIds(needMatchedList);
                 startAnim(false);
+
+                MatchUtil.startChange(mListGameItems, needMatchedList);
 
                 Message message = new Message();
                 message.arg1 = needMatchedList.size();
                 scoreHandler.sendMessage(message);
 
-                resetUIHandler.sendEmptyMessageDelayed(0, 200);
+                resetUIHandler.sendEmptyMessageDelayed(0, Constant.GAME_MATCH_SPEED);
             }
             return true;
         }
@@ -163,10 +162,10 @@ public class GameActivity extends AppCompatActivity {
 
         initMode();
 
-        resetUI();
-        startNewItemAnim(true);
+//        resetUI();
+//        startNewItemAnim(true);
 
-        resetUIHandler.sendEmptyMessageDelayed(0, 200);
+        resetUIHandler.sendEmptyMessageDelayed(0, Constant.GAME_MATCH_SPEED);
     }
 
     private void initMode() {
@@ -217,7 +216,18 @@ public class GameActivity extends AppCompatActivity {
         mNeedAnimLayoutIdList = new ArrayList<Integer>();
         mNewItemLayoutIdList = new ArrayList<Integer>();
 
+        initListGameItems(mListGameItems);
+
 //        mTvScoreNumber.setText(String.format("%d", MMKVUtil.GAME_SCORE_NUMBER));
+    }
+
+    private void initListGameItems(List<GameItem> mListGameItems) {
+        for (int x = 0; x < Constant.GAME_ITEM_COLUMN_COUNT; x++) {
+            for (int y = 0; y < Constant.GAME_ITEM_COLUMN_COUNT; y++) {
+                GameItem gameItem = newGameItem(x, y);
+                mListGameItems.add(gameItem);
+            }
+        }
     }
 
     private void setOnClick(ImageView imageView) {
@@ -231,42 +241,62 @@ public class GameActivity extends AppCompatActivity {
                 if (mFirstClickedItemId == -1 || mFirstClickedItemId == id) {
                     mFirstClickedItemId = id;
                     // TODO 点击效果
-                    int reduceRange = QMUIDisplayHelper.dp2px(mContext, Constant.GAME_ITEM_IMAGEVIEW_WIDTH_REDUCE_RANGE);
-                    v.setPadding(reduceRange, reduceRange, reduceRange, reduceRange);
-                    v.setBackgroundResource(R.color.orange);
+                    setImageViewReduceRange(v);
                     return;
                 } else {
-
                     // TODO 转换消失动画去掉后，不容易出现快速点击的误触问题
 //                    setNeedAnimId(mFirstClickedItemId);
 //                    setNeedAnimId(id);
 //                    startAnim(false);
 
-                    Collections.swap(mListGameItems, mFirstClickedItemId, id);
-                    resetUI();
+                    // 点击后两个图标id切换
+//                    Collections.swap(mListGameItems, mFirstClickedItemId, id);
+                    swapItem(mFirstClickedItemId, id);
+                    resetUI(); // TODO
 
-                    setNeedAnimId(mFirstClickedItemId);
-                    setNeedAnimId(id);
-                    startAnim(true);
+//                    setNeedAnimId(mFirstClickedItemId);
+//                    setNeedAnimId(id);
+//                    startAnim(true);
 
 
+                    // 传入点击的两个点位置，进行三消判定
                     List<Integer> itemIdList = new ArrayList<Integer>();
                     itemIdList.add(mFirstClickedItemId);
                     itemIdList.add(id);
+
+                    // 获取需要三消的id列表
                     List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, itemIdList);
-                    setNeedAnimIds(needMatchedList);
-                    startAnim(false);
 
-                    Message message = new Message();
-                    message.arg1 = needMatchedList.size();
-                    scoreHandler.sendMessage(message);
+                    if (needMatchedList.size() >= 3) {
+                        // 需要三消的图标开始动画
+                        setNeedAnimIds(needMatchedList);
+                        startAnim(false);
 
-                    resetUIHandler.sendEmptyMessageDelayed(0, 200);
+                        MatchUtil.startChange(mListGameItems, needMatchedList);
 
+                        Message message = new Message();
+                        message.arg1 = needMatchedList.size();
+                        scoreHandler.sendMessage(message);
+
+                        resetUIHandler.sendEmptyMessageDelayed(0, Constant.GAME_MATCH_SPEED);
+                    }
                     resetClickedItemId();
                 }
             }
         });
+    }
+
+    private void setImageViewReduceRange(View v) {
+        int reduceRange = QMUIDisplayHelper.dp2px(mContext, Constant.GAME_ITEM_IMAGEVIEW_WIDTH_REDUCE_RANGE);
+        v.setPadding(reduceRange, reduceRange, reduceRange, reduceRange);
+        v.setBackgroundResource(R.color.orange);
+    }
+
+    private void swapItem(int from, int to) {
+        GameItem fromItem = mListGameItems.get(from);
+        GameItem toItem = mListGameItems.get(to);
+        mListGameItems.set(from, toItem);
+        mListGameItems.set(to, fromItem);
     }
 
     private void setNeedAnimId(int id) {
@@ -291,28 +321,32 @@ public class GameActivity extends AppCompatActivity {
         mNeedAnimLayoutIdList.clear();
     }
 
-    private void setNewItemLayoutId(int id) {
-        mNewItemLayoutIdList.add(id);
-    }
+//    private void setNewItemLayoutId(int id) {
+//        mNewItemLayoutIdList.add(id);
+//    }
 
-    private void startNewItemAnim(boolean isShow) {
-        for (int i = 0; i < mNewItemLayoutIdList.size(); i++) {
-            int id = mNewItemLayoutIdList.get(i);
-            RelativeLayout layout = mListItemLayouts.get(id);
-            layout.clearAnimation();
-            if (isShow) {
-                layout.startAnimation(showAnimation);
-            } else {
-                layout.startAnimation(hideAnimation);
-            }
-        }
-        mNewItemLayoutIdList.clear();
-    }
+//    private void startNewItemAnim(boolean isShow) {
+//        for (int i = 0; i < mNewItemLayoutIdList.size(); i++) {
+//            int id = mNewItemLayoutIdList.get(i);
+//            RelativeLayout layout = mListItemLayouts.get(id);
+//            layout.clearAnimation();
+//            if (isShow) {
+//                layout.startAnimation(showAnimation);
+//            } else {
+//                layout.startAnimation(hideAnimation);
+//            }
+//        }
+//        mNewItemLayoutIdList.clear();
+//    }
 
     private GameItem newGameItem() {
+        return newGameItem(0, 0);
+    }
+
+    private GameItem newGameItem(int x, int y) {
         SecureRandom sr = new SecureRandom();
         int i = sr.nextInt(Constant.GAME_ITEM_TYPE_COUNT);
-        return new GameItem(i, mPersonNameList[i], mPersonImageArray.getResourceId(i, 0));
+        return new GameItem(Constant.GAME_ITEM_SHOW_TYPE_NORMAL, x, y, i, mPersonNameList[i], mPersonImageArray.getResourceId(i, 0));
     }
 
     @Override
@@ -348,39 +382,52 @@ public class GameActivity extends AppCompatActivity {
      * 2、三消后元素下移到底部，顶部出现新元素；
      */
     private void resetUI() {
-        mGlGameBoard.removeAllViews();
-        mListItemLayouts.clear();
+//        mGlGameBoard.removeAllViews();
+//        mListItemLayouts.clear();
 
         int size = mListGameItems.size();
         Log.d(TAG, "resetUI: size = " + size);
-        for (int i = 0; i < Constant.GAME_ITEM_COLUMN_COUNT * Constant.GAME_ITEM_COLUMN_COUNT; i++) {
-            GameItem gameItem;
-            if (i >= size) {
-                gameItem = newGameItem();
-                mListGameItems.add(gameItem);
+        Log.d(TAG, "resetUI: mGlGameBoard.getChildCount() = " + mGlGameBoard.getChildCount());
 
-                // 添加需要加载显示动画的id
-                setNewItemLayoutId(i);
-            } else {
-                gameItem = mListGameItems.get(i);
-            }
+        for (int x = 0; x < Constant.GAME_ITEM_COLUMN_COUNT; x++) {
+            for (int y = 0; y < Constant.GAME_ITEM_COLUMN_COUNT; y++) {
+                int position = PositionUtil.getPositionFromXY(x, y);
+//                Log.d(TAG, "resetUI: x,y,position = " + x + "," + y + "," + position);
+                GameItem gameItem = mListGameItems.get(position);
+
+                // 如果该位置标志为空，获取该位置的GameItem并更新ImageView图标
+                if (gameItem.getShowStatus() == Constant.GAME_ITEM_SHOW_TYPE_NULL) {
+                    // 标志位恢复正常
+                    gameItem = newGameItem(x, y);
+                    mListGameItems.set(position, gameItem);
+                    // TODO bug:会屏闪，添加需要加载显示动画的id
+//                    setNewItemLayoutId(position);
+                }
 //            Log.d(TAG, "resetUI: gameItem = " + gameItem.toString());
-            RelativeLayout layout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.item_person, null);
-            int px = QMUIDisplayHelper.dp2px(this, Constant.GAME_ITEM_WIDTH);
-            layout.setLayoutParams(new RelativeLayout.LayoutParams(px, px));
-            ImageView imageView = layout.findViewById(R.id.iv_item);
-            imageView.setImageResource(gameItem.getImage());
-            imageView.setTag(i);
 
-            setOnClick(imageView);
-            mGlGameBoard.addView(layout);
-            mListItemLayouts.add(layout);
+                View child = mGlGameBoard.getChildAt(position);
+                RelativeLayout layout;
+                if (child == null) {
+                    layout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.item_person, null);
+                    int px = QMUIDisplayHelper.dp2px(this, Constant.GAME_ITEM_WIDTH);
+                    layout.setLayoutParams(new RelativeLayout.LayoutParams(px, px));
+                    mGlGameBoard.addView(layout, position);
+                    mListItemLayouts.add(layout);
+                } else {
+                    layout = (RelativeLayout) child;
+                }
+                ImageView imageView = layout.findViewById(R.id.iv_item);
+                imageView.setImageResource(gameItem.getImage());
+                imageView.setPadding(0, 0, 0, 0);
+                imageView.setTag(position);
+                setOnClick(imageView);
+
+//            Log.d(TAG, "resetUI:mGlGameBoard.indexOfChild(layout); = " + mGlGameBoard.indexOfChild(layout));
+            }
         }
-
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(mGlGameBoard.getLayoutParams());
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         mGlGameBoard.setLayoutParams(layoutParams);
-
     }
 
     private void resetClickedItemId() {
@@ -416,7 +463,8 @@ public class GameActivity extends AppCompatActivity {
 
 
     /**
-     * TODO 简化逻辑，只更新需要更新的图标，尝试使用mGlGameBoard.removeViewAt(index);
+     * @deprecated 废弃，生成的图标只能在尾部补充，不符合习惯
+     * 后期可以简化逻辑，只更新需要更新的图标，尝试使用mGlGameBoard.removeViewAt(index);
      * 重新绘制游戏画板
      */
 //    private void resetUI() {
