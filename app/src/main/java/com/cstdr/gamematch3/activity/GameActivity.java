@@ -37,29 +37,64 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 游戏主界面
+ * 功能详见 （https://github.com/cstdr/android_game_match3/blob/main/README.md）
+ */
 public class GameActivity extends AppCompatActivity {
 
     private static final String TAG = GameActivity.class.getSimpleName();
 
     private Context mContext;
+    /**
+     * 游戏画布
+     */
     private GridLayout mGlGameBoard;
 
+    /**
+     * 积分数值
+     */
     private TextView mTvScoreNumber;
+    /**
+     * 计时数值
+     */
     private TextView mTvTimeNumber;
 
+    /**
+     * 存放图标数据
+     */
     private List<GameItem> mListGameItems;
+    /**
+     * 存放图标的layout，方便调整样式
+     */
     private List<RelativeLayout> mListItemLayouts;
+    /**
+     * 需要执行动画的切换layoutId列表
+     */
     private List<Integer> mNeedAnimLayoutIdList;
+    /**
+     * 需要执行动画的补充图标layoutId列表
+     */
     private List<Integer> mNewItemLayoutIdList;
 
+    /**
+     * 第一次点击的图标位置
+     */
     private int mFirstClickedItemId = -1;
+
     private String[] mPersonNameList;
     private TypedArray mPersonImageArray;
     private Animation showAnimation;
     private Animation hideAnimation;
 
+    /**
+     * 计时int数值
+     */
     private int mCountdown;
 
+    /**
+     * 刷新画布图标的handler
+     */
     private Handler resetUIHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
@@ -71,12 +106,14 @@ public class GameActivity extends AppCompatActivity {
 //            // 三消后，新添加的图标动画显示入场
 //            startNewItemAnim(true);
 
+            // 查询哪些图标位置应该消除
             List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, null);
             Log.d(TAG, "handleMessage: needMatchedList = " + needMatchedList.size());
-            if (needMatchedList.size() >= 3) {
+            if (needMatchedList.size() >= 3) { // 达到三消条件
                 setNeedAnimIds(needMatchedList);
                 startAnim(false);
 
+                // 开始图标位置转换
                 MatchUtil.startChange(mListGameItems, needMatchedList);
 
                 Message message = new Message();
@@ -89,6 +126,9 @@ public class GameActivity extends AppCompatActivity {
         }
     });
 
+    /**
+     * 计算积分的handler
+     */
     private Handler scoreHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
@@ -103,6 +143,9 @@ public class GameActivity extends AppCompatActivity {
         }
     });
 
+    /**
+     * 计算计时数值的handler
+     */
     private Handler countdownHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
@@ -132,6 +175,9 @@ public class GameActivity extends AppCompatActivity {
         }
     });
 
+    /**
+     * 点击游戏结束对话框后的逻辑
+     */
     private Handler gameoverHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
@@ -272,6 +318,7 @@ public class GameActivity extends AppCompatActivity {
                         setNeedAnimIds(needMatchedList);
                         startAnim(false);
 
+                        // 开始图标位置转换
                         MatchUtil.startChange(mListGameItems, needMatchedList);
 
                         Message message = new Message();
@@ -286,12 +333,21 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * 设置点击后的图标效果
+     * @param v
+     */
     private void setImageViewReduceRange(View v) {
         int reduceRange = QMUIDisplayHelper.dp2px(mContext, Constant.GAME_ITEM_IMAGEVIEW_WIDTH_REDUCE_RANGE);
         v.setPadding(reduceRange, reduceRange, reduceRange, reduceRange);
         v.setBackgroundResource(R.color.orange);
     }
 
+    /**
+     * 点击第二个位置后切换图标
+     * @param from
+     * @param to
+     */
     private void swapItem(int from, int to) {
         GameItem fromItem = mListGameItems.get(from);
         GameItem toItem = mListGameItems.get(to);
@@ -343,6 +399,12 @@ public class GameActivity extends AppCompatActivity {
         return newGameItem(0, 0);
     }
 
+    /**
+     * 随机生成一个图标元素，x和y暂时没有用到
+     * @param x
+     * @param y
+     * @return
+     */
     private GameItem newGameItem(int x, int y) {
         SecureRandom sr = new SecureRandom();
         int i = sr.nextInt(Constant.GAME_ITEM_TYPE_COUNT);

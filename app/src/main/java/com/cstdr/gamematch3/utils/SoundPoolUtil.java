@@ -30,6 +30,8 @@ public class SoundPoolUtil {
         soundIds.put(KEY_EXPLODE_BGM, sp.load(context, R.raw.bgm_explode, 1));
         soundIds.put(KEY_SUCCESS_BGM, sp.load(context, R.raw.bgm_success, 1));
         soundIds.put(KEY_FAIL_BGM, sp.load(context, R.raw.bgm_fail, 1));
+
+        // 这里要用监听，因为直接执行时，音乐文件过大导致还没load成功
         sp.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
             @Override
             public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {

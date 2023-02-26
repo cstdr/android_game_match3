@@ -54,6 +54,9 @@ public interface Constant {
      */
     int GAME_ITEM_SHOW_TYPE_NORMAL = 1;
 
+    /**
+     * 游戏动画速度，可以调整游戏的节奏，玩起来更爽
+     */
     int GAME_MATCH_SPEED = 200;
 
 

@@ -9,6 +9,11 @@ import com.cstdr.gamematch3.GameSplashActivity;
 
 public class DialogUtil {
 
+    /**
+     * 游戏结束时弹窗
+     * @param context
+     * @param gameoverHandler
+     */
     public static void showGameoverDialog(Context context, Handler gameoverHandler) {
         String msg = String.format("本轮得分：%d,  历史最高分：%d", MMKVUtil.GAME_SCORE_NUMBER, MMKVUtil.GAME_HIGHEST_SCORE_NUMBER);
 
