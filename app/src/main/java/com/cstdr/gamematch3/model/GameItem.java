@@ -5,6 +5,7 @@ package com.cstdr.gamematch3.model;
  */
 public class GameItem {
 
+    private int property;
     private int showStatus;
     private int image;
     private String personName;
@@ -12,13 +13,14 @@ public class GameItem {
     private int x;
     private int y;
 
-    public GameItem(int showStatus, int x, int y, int type, String personName, int image) {
+    public GameItem(int showStatus, int x, int y, int type, int property, String personName, int image) {
         this.showStatus = showStatus;
         this.x = x;
         this.y = y;
         this.personName = personName;
         this.type = type;
         this.image = image;
+        this.property = property;
     }
 
     public int getImage() {
@@ -45,21 +47,21 @@ public class GameItem {
         return type;
     }
 
-    public int getX() {
-        return x;
-    }
+//    public int getX() {
+//        return x;
+//    }
 
-    public void setX(int x) {
-        this.x = x;
-    }
+//    public void setX(int x) {
+//        this.x = x;
+//    }
 
-    public int getY() {
-        return y;
-    }
+//    public int getY() {
+//        return y;
+//    }
 
-    public void setY(int y) {
-        this.y = y;
-    }
+//    public void setY(int y) {
+//        this.y = y;
+//    }
 
     public int getShowStatus() {
         return showStatus;
@@ -75,5 +77,13 @@ public class GameItem {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public int getProperty() {
+        return property;
+    }
+
+    public void setProperty(int property) {
+        this.property = property;
     }
 }

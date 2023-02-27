@@ -32,6 +32,46 @@ public interface Constant {
     int GAME_ITEM_TYPE_5 = 5;
     int GAME_ITEM_TYPE_6 = 6;
 
+
+    /**
+     * 游戏图标有多少属性
+     */
+    int GAME_ITEM_PROPERTY_COUNT = 4;
+    /**
+     * 特殊属性：普通图标类型
+     */
+    int GAME_ITEM_PROPERTY_NORMAL = 0;
+    /**
+     * 特殊属性：横向消除
+     */
+    int GAME_ITEM_PROPERTY_PORT = 1;
+    /**
+     * 特殊属性：纵向消除
+     */
+    int GAME_ITEM_PROPERTY_LAND = 2;
+    /**
+     * 特殊属性：所有同类图标消除
+     */
+    int GAME_ITEM_PROPERTY_SAME = 3;
+
+    /**
+     * 生成正常属性图标的概率
+     */
+    int GAME_ITEM_PROPERTY_NORMAL_ODDS = 95;
+    /**
+     * 生成纵向属性图标的概率
+     */
+    int GAME_ITEM_PROPERTY_PORT_ODDS = GAME_ITEM_PROPERTY_NORMAL_ODDS + 2;
+    /**
+     * 生成横向属性图标的概率
+     */
+    int GAME_ITEM_PROPERTY_LAND_ODDS = GAME_ITEM_PROPERTY_PORT_ODDS + 2;
+    /**
+     * 生成同类属性图标的概率
+     */
+    int GAME_ITEM_PROPERTY_SAME_ODDS = GAME_ITEM_PROPERTY_LAND_ODDS + 1;
+
+
     /**
      * 游戏图标在被点击后缩小的宽度
      */

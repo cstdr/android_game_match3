@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.cstdr.gamematch3.R;
 import com.cstdr.gamematch3.model.GameItem;
-import com.google.android.material.math.MathUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +19,7 @@ public class MatchUtil {
 
     /**
      * 查询应该消除的图标位置
+     *
      * @param list
      * @param itemIdList
      * @return
@@ -46,15 +46,57 @@ public class MatchUtil {
             }
         });
 
-//        if (needMatchedList.size() >= 3) {
-            // 老算法是需要删除图标，现在不删除，只在原位置修改图标
-//            removeMatch(list, needMatchedList);
-//        }
+        // 检查三消的图标里有没有特殊属性，然后进行处理
+        int size = needMatchedList.size();
+        if (size >= 3) {
+            for (int i = 0; i < size; i++) {
+                int position = needMatchedList.get(i);
+                GameItem gameItem = list.get(position);
+                if (gameItem.getProperty() != Constant.GAME_ITEM_PROPERTY_NORMAL) {
+                    startPropertyMatch(list, needMatchedList, position);
+                }
+            }
+        }
         return needMatchedList;
     }
 
     /**
+     * 开始处理特殊属性的图标（横向、纵向、同类）
+     *
+     * @param list
+     * @param needMatchedList
+     * @param itemPosition
+     */
+    private static void startPropertyMatch(List<GameItem> list, List<Integer> needMatchedList, int itemPosition) {
+        GameItem gameItem = list.get(itemPosition);
+        int property = gameItem.getProperty();
+        int position;
+        if (property == Constant.GAME_ITEM_PROPERTY_PORT) {
+            int[] xy = PositionUtil.getXYFromPosition(itemPosition);
+            for (int x = 0; x < Constant.GAME_ITEM_COLUMN_COUNT; x++) {
+                position = PositionUtil.getPositionFromXY(x, xy[1]);
+                needMatchedList.add(position);
+            }
+        } else if (property == Constant.GAME_ITEM_PROPERTY_LAND) {
+            int[] xy = PositionUtil.getXYFromPosition(itemPosition);
+            for (int y = 0; y < Constant.GAME_ITEM_COLUMN_COUNT; y++) {
+                position = PositionUtil.getPositionFromXY(xy[0], y);
+                needMatchedList.add(position);
+            }
+        } else if (property == Constant.GAME_ITEM_PROPERTY_SAME) {
+            int type = gameItem.getType();
+            for (int pos = 0; pos < Constant.GAME_ITEM_COLUMN_COUNT * Constant.GAME_ITEM_COLUMN_COUNT; pos++) {
+                GameItem item = list.get(pos);
+                if (item.getType() == type) {
+                    needMatchedList.add(pos);
+                }
+            }
+        }
+    }
+
+    /**
      * 查询出需要消除的位置并存入list
+     *
      * @param list
      * @param needMatchedList
      * @param itemId
@@ -109,9 +151,9 @@ public class MatchUtil {
     }
 
     /**
-     * @deprecated 老算法需要删除图标，已废弃
      * @param list
      * @param needMatchedList
+     * @deprecated 老算法需要删除图标，已废弃
      */
     private static void removeMatch(List<GameItem> list, List<Integer> needMatchedList) {
         Log.d(TAG, "removeMatch: ========" + needMatchedList.size());
@@ -132,9 +174,10 @@ public class MatchUtil {
 
     /**
      * 向某个方向递归查询相邻两个图标是否相同
-     * @param list 所有图标列表
-     * @param i 查询的起始位置
-     * @param direction 查询方向
+     *
+     * @param list             所有图标列表
+     * @param i                查询的起始位置
+     * @param direction        查询方向
      * @param matchedCountList 查询出的需要消除的图标位置列表
      * @return
      */
@@ -170,9 +213,24 @@ public class MatchUtil {
             return false;
         }
 
+        // 废弃逻辑：原因是可能会遗漏需要消除的图标，比如三消后引爆了某个边缘的特殊图标，可能只有单边会纵向或者横向消除
+        // 遇到特殊属性图标，处理特殊逻辑，这里为了代码结构清晰，没有把判定写复杂
+        // 纵向属性
+//        if (item1.getProperty() == Constant.GAME_ITEM_PROPERTY_PORT) {
+//            if (direction == -Constant.GAME_ITEM_COLUMN_COUNT || direction == Constant.GAME_ITEM_COLUMN_COUNT) {
+//                matchedCountList.add(i + direction);
+//                return checkMatch(list, i + direction, direction, matchedCountList);
+//            }
+//        } else if (item1.getProperty() == Constant.GAME_ITEM_PROPERTY_LAND) { // 横向属性
+//            if (direction == -1 || direction == 1) {
+//                matchedCountList.add(i + direction);
+//                return checkMatch(list, i + direction, direction, matchedCountList);
+//            }
+//        }
+
         // 注意检查是否到画布边缘，到了要停止查询
         if (item1.getType() == item2.getType()) {
-            Log.d(TAG, "checkMatch: type相等 " + i + "和" + (i + direction));
+//            Log.d(TAG, "checkMatch: type相等 " + i + "和" + (i + direction));
 
             matchedCountList.add(i + direction);
 
@@ -185,7 +243,8 @@ public class MatchUtil {
 
     /**
      * 根据需要消除的位置，进行实际的图标位置调整，默认方向是三消后新补充的图标从上方落下
-     * @param mListGameItems 所有图标列表
+     *
+     * @param mListGameItems  所有图标列表
      * @param needMatchedList 需要消除的图标位置列表
      */
     public static void startChange(List<GameItem> mListGameItems, List<Integer> needMatchedList) {
@@ -195,9 +254,10 @@ public class MatchUtil {
     /**
      * 根据需要消除的位置，进行实际的图标位置调整，三消后新补充的图标从传入方向补充
      * TODO bug:如果竖列多个三消，会导致后续补充图标错乱
-     * @param mListGameItems 所有图标列表
+     *
+     * @param mListGameItems  所有图标列表
      * @param needMatchedList 需要消除的图标位置列表
-     * @param direction TODO 目前没有写逻辑，原理是调整x和y的for循环顺序就可以实现
+     * @param direction       TODO 目前没有写逻辑，原理是调整x和y的for循环顺序就可以实现
      */
     public static void startChange(List<GameItem> mListGameItems, List<Integer> needMatchedList, int direction) {
         Log.d(TAG, "startChange:  =========");
@@ -232,7 +292,7 @@ public class MatchUtil {
                 // 该列有需要消除的图标，并且当前位置不是需要消除的图标，则把该图标位置加入到list
                 // 该list相当于把消除后的列里其他剩余图标存放，然后一起移到底部
                 if (yStartId > -1 && !isMatched) {
-                    Log.d(TAG, "需要移动的position = " + position);
+//                    Log.d(TAG, "需要移动的position = " + position);
                     yNeedDownList.add(position);
                 }
                 isMatched = false;
@@ -241,21 +301,21 @@ public class MatchUtil {
             if (yStartId > -1) {
                 int yNeedDownId = 0;
                 for (int x = yStartId; x >= 0; x--) {
-                    Log.d(TAG, "startChange: x =" + x);
+//                    Log.d(TAG, "startChange: x =" + x);
 
                     position = PositionUtil.getPositionFromXY(x, y);
-                    Log.d(TAG, "当前位置position = " + position);
-                    Log.d(TAG, "startChange: yNeedDownList.size() = " + yNeedDownList.size());
-                    Log.d(TAG, "startChange: yNeedDownList = " + yNeedDownList);
+//                    Log.d(TAG, "当前位置position = " + position);
+//                    Log.d(TAG, "startChange: yNeedDownList.size() = " + yNeedDownList.size());
+//                    Log.d(TAG, "startChange: yNeedDownList = " + yNeedDownList);
                     // 该位置为三消的图标，则后面正常图标向底部补充，直到剩余图标补充完
                     if (yNeedDownId < yNeedDownList.size()) {
                         int needDownPosition = yNeedDownList.get(yNeedDownId);
-                        Log.d(TAG, "startChange: needDownPosition = " + needDownPosition);
+//                        Log.d(TAG, "startChange: needDownPosition = " + needDownPosition);
                         GameItem needDownItem = mListGameItems.get(needDownPosition);
                         mListGameItems.set(position, needDownItem);
                         yNeedDownId++;
                     } else { // 原来剩余图标补充完，后面空出的位置修改为空类型图标，留给restUI函数进行创建新图标
-                        Log.d(TAG, "!!!!===position = " + position);
+//                        Log.d(TAG, "!!!!===position = " + position);
                         GameItem nullItem = mListGameItems.get(position);
                         nullItem.setShowStatus(Constant.GAME_ITEM_SHOW_TYPE_NULL);
                         nullItem.setImage(R.drawable.btn_bg);

@@ -34,7 +34,6 @@ import com.tencent.mmkv.MMKV;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -185,6 +184,8 @@ public class GameActivity extends AppCompatActivity {
             clearGameData();
 
             if (msg.what == 0) { // 重新开始
+                initListGameItems(mListGameItems);
+
                 resetUIHandler.sendEmptyMessage(0);
                 countdownHandler.sendEmptyMessageDelayed(1, 1000);
                 mTvScoreNumber.setText(String.format("%d", MMKVUtil.GAME_SCORE_NUMBER));
@@ -284,7 +285,6 @@ public class GameActivity extends AppCompatActivity {
                 Log.d(TAG, "onClick: id = " + id);
 
 
-
                 // 如果第一次是这个id，或者刚三消后，则把这次设为第一次点击
                 if (mFirstClickedItemId == -1 || mFirstClickedItemId == id) {
                     mFirstClickedItemId = id;
@@ -305,7 +305,7 @@ public class GameActivity extends AppCompatActivity {
                     // 点击后两个图标id切换
 //                    Collections.swap(mListGameItems, mFirstClickedItemId, id);
                     swapItem(mFirstClickedItemId, id);
-                    resetUI(); // TODO
+                    resetUI(); // 点击后刷新UI
 
 //                    setNeedAnimId(mFirstClickedItemId);
 //                    setNeedAnimId(id);
@@ -342,6 +342,7 @@ public class GameActivity extends AppCompatActivity {
 
     /**
      * 设置点击后的图标效果
+     *
      * @param v
      */
     private void setImageViewReduceRange(View v) {
@@ -352,6 +353,7 @@ public class GameActivity extends AppCompatActivity {
 
     /**
      * 点击第二个位置后切换图标
+     *
      * @param from
      * @param to
      */
@@ -402,12 +404,13 @@ public class GameActivity extends AppCompatActivity {
 //        mNewItemLayoutIdList.clear();
 //    }
 
-    private GameItem newGameItem() {
-        return newGameItem(0, 0);
-    }
+//    private GameItem newGameItem() {
+//        return newGameItem(0, 0);
+//    }
 
     /**
      * 随机生成一个图标元素，x和y暂时没有用到
+     *
      * @param x
      * @param y
      * @return
@@ -415,7 +418,23 @@ public class GameActivity extends AppCompatActivity {
     private GameItem newGameItem(int x, int y) {
         SecureRandom sr = new SecureRandom();
         int i = sr.nextInt(Constant.GAME_ITEM_TYPE_COUNT);
-        return new GameItem(Constant.GAME_ITEM_SHOW_TYPE_NORMAL, x, y, i, mPersonNameList[i], mPersonImageArray.getResourceId(i, 0));
+
+        int property = Constant.GAME_ITEM_PROPERTY_NORMAL;
+        int odds = sr.nextInt(100);
+        if (odds < Constant.GAME_ITEM_PROPERTY_NORMAL_ODDS) {
+            property = Constant.GAME_ITEM_PROPERTY_NORMAL;
+        } else if (odds < Constant.GAME_ITEM_PROPERTY_PORT_ODDS) {
+            Log.d(TAG, "newGameItem: @@@生成纵向特殊图标！！！===================");
+            property = Constant.GAME_ITEM_PROPERTY_PORT;
+        } else if (odds < Constant.GAME_ITEM_PROPERTY_LAND_ODDS) {
+            Log.d(TAG, "newGameItem: @@@生成横向特殊图标！！！===================");
+            property = Constant.GAME_ITEM_PROPERTY_LAND;
+        } else if (odds < Constant.GAME_ITEM_PROPERTY_SAME_ODDS) {
+            Log.d(TAG, "newGameItem: @@@生成同类特殊图标！！！===================");
+            property = Constant.GAME_ITEM_PROPERTY_SAME;
+        }
+
+        return new GameItem(Constant.GAME_ITEM_SHOW_TYPE_NORMAL, x, y, i, property, mPersonNameList[i], mPersonImageArray.getResourceId(i, 0));
     }
 
     @Override
@@ -485,6 +504,9 @@ public class GameActivity extends AppCompatActivity {
                 } else {
                     layout = (RelativeLayout) child;
                 }
+                // 设置特殊图标背景
+                setPropertyItemBackground(gameItem, layout);
+
                 ImageView imageView = layout.findViewById(R.id.iv_item);
                 imageView.setImageResource(gameItem.getImage());
                 imageView.setPadding(0, 0, 0, 0);
@@ -497,6 +519,31 @@ public class GameActivity extends AppCompatActivity {
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(mGlGameBoard.getLayoutParams());
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         mGlGameBoard.setLayoutParams(layoutParams);
+    }
+
+    /**
+     * 设置特殊图标的背景
+     *
+     * @param gameItem
+     * @param layout
+     */
+    private void setPropertyItemBackground(GameItem gameItem, RelativeLayout layout) {
+        int property = gameItem.getProperty();
+        switch (property) {
+            case Constant.GAME_ITEM_PROPERTY_PORT:
+                layout.setBackgroundResource(R.drawable.item_bg_port);
+                break;
+            case Constant.GAME_ITEM_PROPERTY_LAND:
+                layout.setBackgroundResource(R.drawable.item_bg_land);
+                break;
+            case Constant.GAME_ITEM_PROPERTY_SAME:
+                layout.setBackgroundResource(R.drawable.item_bg_same);
+                break;
+            default:
+                layout.setBackgroundResource(R.drawable.item_bg_normal);
+                break;
+
+        }
     }
 
     private void resetClickedItemId() {
