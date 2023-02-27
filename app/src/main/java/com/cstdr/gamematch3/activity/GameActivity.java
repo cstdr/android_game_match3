@@ -283,13 +283,20 @@ public class GameActivity extends AppCompatActivity {
                 int id = (int) v.getTag();
                 Log.d(TAG, "onClick: id = " + id);
 
+
+
                 // 如果第一次是这个id，或者刚三消后，则把这次设为第一次点击
                 if (mFirstClickedItemId == -1 || mFirstClickedItemId == id) {
                     mFirstClickedItemId = id;
                     // TODO 点击效果
                     setImageViewReduceRange(v);
+
+                    // 点击音效
+                    SoundPoolUtil.playClick();
                     return;
                 } else {
+                    // 点击音效
+                    SoundPoolUtil.playClickSecond();
                     // TODO 转换消失动画去掉后，不容易出现快速点击的误触问题
 //                    setNeedAnimId(mFirstClickedItemId);
 //                    setNeedAnimId(id);

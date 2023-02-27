@@ -14,6 +14,8 @@ public class SoundPoolUtil {
     private static final String KEY_EXPLODE_BGM = "KEY_EXPLODE_BGM";
     private static final String KEY_SUCCESS_BGM = "KEY_SUCCESS_BGM";
     private static final String KEY_FAIL_BGM = "KEY_FAIL_BGM";
+    private static final String KEY_CLICK_BGM = "KEY_CLICK_BGM";
+    private static final String KEY_CLICK_SECOND_BGM = "KEY_CLICK_SECOND_BGM";
     private static final String TAG = SoundPoolUtil.class.getSimpleName();
 
 
@@ -27,6 +29,8 @@ public class SoundPoolUtil {
         soundIds = new HashMap<>();
         sp = new SoundPool.Builder().setMaxStreams(10).build();
         soundIds.put(KEY_COVER_BGM, sp.load(context, R.raw.bgm_cover, 1));
+        soundIds.put(KEY_CLICK_BGM, sp.load(context, R.raw.bgm_click, 1));
+        soundIds.put(KEY_CLICK_SECOND_BGM, sp.load(context, R.raw.bgm_click_second, 1));
         soundIds.put(KEY_EXPLODE_BGM, sp.load(context, R.raw.bgm_explode, 1));
         soundIds.put(KEY_SUCCESS_BGM, sp.load(context, R.raw.bgm_success, 1));
         soundIds.put(KEY_FAIL_BGM, sp.load(context, R.raw.bgm_fail, 1));
@@ -65,6 +69,13 @@ public class SoundPoolUtil {
 
     public static void playFail() {
         playDefault(soundIds.get(KEY_FAIL_BGM), false);
+    }
+    public static void playClick() {
+        playDefault(soundIds.get(KEY_CLICK_BGM), false);
+    }
+
+    public static void playClickSecond() {
+        playDefault(soundIds.get(KEY_CLICK_SECOND_BGM), false);
     }
 
     public static void release() {
