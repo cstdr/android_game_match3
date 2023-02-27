@@ -108,7 +108,8 @@ public class GameActivity extends AppCompatActivity {
             // 查询哪些图标位置应该消除
             List<Integer> needMatchedList = MatchUtil.startMatch(mListGameItems, null);
             Log.d(TAG, "handleMessage: needMatchedList = " + needMatchedList.size());
-            if (needMatchedList.size() >= 3) { // 达到三消条件
+            int size = needMatchedList.size();
+            if (size >= 3) { // 达到三消条件
                 setNeedAnimIds(needMatchedList);
                 startAnim(false);
 
@@ -135,8 +136,9 @@ public class GameActivity extends AppCompatActivity {
             if (score > 0) {
                 MMKVUtil.GAME_SCORE_NUMBER += score * MMKVUtil.GAME_SCORE_TIMES;
                 mTvScoreNumber.setText(String.format("%d", MMKVUtil.GAME_SCORE_NUMBER));
+
                 // TODO 加分时发生音效
-                SoundPoolUtil.playExplode();
+                SoundPoolUtil.playMatchSound(score);
             }
             return false;
         }
@@ -150,6 +152,9 @@ public class GameActivity extends AppCompatActivity {
         public boolean handleMessage(@NonNull Message msg) {
             if (msg.what == 1) {
                 mCountdown = MMKVUtil.MODE_TIME_COUNTDOWN;
+            }
+            if (mCountdown == Constant.START_GAME_COUNT_DOWN_SOUND) {
+                SoundPoolUtil.playCountdown();
             }
             mCountdown--;
             String timeStr = TimeUtil.getTimeStr(mCountdown);

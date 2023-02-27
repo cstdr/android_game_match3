@@ -99,5 +99,10 @@ public interface Constant {
      */
     int GAME_MATCH_SPEED = 200;
 
+    /**
+     * 游戏倒计时剩余几秒开始发生音效
+     */
+    int START_GAME_COUNT_DOWN_SOUND = 10;
+
 
 }
