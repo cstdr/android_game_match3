@@ -91,6 +91,8 @@ public class GameActivity extends AppCompatActivity {
      */
     private int mCountdown;
 
+    private int mGameMode;
+
     /**
      * 刷新画布图标的handler
      */
@@ -207,6 +209,10 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         mContext = this;
+        Intent intent = getIntent();
+        if (intent != null) {
+            mGameMode = intent.getIntExtra(MMKVUtil.KEY_MODE, 0);
+        }
 
         initView();
         initAnimation();
@@ -221,17 +227,15 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void initMode() {
-        Intent intent = getIntent();
-        if (intent != null) {
-            int mode = intent.getIntExtra(MMKVUtil.KEY_MODE, 0);
-            if (mode == MMKVUtil.MODE_TIME) {
-                mCountdown = MMKVUtil.MODE_TIME_COUNTDOWN;
-                countdownHandler.sendEmptyMessage(0);
+        if (mGameMode == MMKVUtil.MODE_TIME || mGameMode == MMKVUtil.MODE_TIME_PROPERTY) {
+            mCountdown = MMKVUtil.MODE_TIME_COUNTDOWN;
+            countdownHandler.sendEmptyMessage(0);
 
-            } else if (mode == MMKVUtil.MODE_INFINITE) {
-                mTvTimeNumber.setText("无限模式");
-            }
+        } else if (mGameMode == MMKVUtil.MODE_INFINITE) {
+            mTvTimeNumber.setText("无限模式");
         }
+
+        MMKV.defaultMMKV().putInt(MMKVUtil.KEY_MODE, mGameMode);
 
     }
 
@@ -425,18 +429,21 @@ public class GameActivity extends AppCompatActivity {
         int i = sr.nextInt(Constant.GAME_ITEM_TYPE_COUNT);
 
         int property = Constant.GAME_ITEM_PROPERTY_NORMAL;
-        int odds = sr.nextInt(100);
-        if (odds < Constant.GAME_ITEM_PROPERTY_NORMAL_ODDS) {
-            property = Constant.GAME_ITEM_PROPERTY_NORMAL;
-        } else if (odds < Constant.GAME_ITEM_PROPERTY_PORT_ODDS) {
-            Log.d(TAG, "newGameItem: @@@生成纵向特殊图标！！！===================");
-            property = Constant.GAME_ITEM_PROPERTY_PORT;
-        } else if (odds < Constant.GAME_ITEM_PROPERTY_LAND_ODDS) {
-            Log.d(TAG, "newGameItem: @@@生成横向特殊图标！！！===================");
-            property = Constant.GAME_ITEM_PROPERTY_LAND;
-        } else if (odds < Constant.GAME_ITEM_PROPERTY_SAME_ODDS) {
-            Log.d(TAG, "newGameItem: @@@生成同类特殊图标！！！===================");
-            property = Constant.GAME_ITEM_PROPERTY_SAME;
+
+        if (mGameMode == MMKVUtil.MODE_TIME_PROPERTY) {
+            int odds = sr.nextInt(100);
+            if (odds < Constant.GAME_ITEM_PROPERTY_NORMAL_ODDS) {
+                property = Constant.GAME_ITEM_PROPERTY_NORMAL;
+            } else if (odds < Constant.GAME_ITEM_PROPERTY_PORT_ODDS) {
+                Log.d(TAG, "newGameItem: @@@生成纵向特殊图标！！！===================");
+                property = Constant.GAME_ITEM_PROPERTY_PORT;
+            } else if (odds < Constant.GAME_ITEM_PROPERTY_LAND_ODDS) {
+                Log.d(TAG, "newGameItem: @@@生成横向特殊图标！！！===================");
+                property = Constant.GAME_ITEM_PROPERTY_LAND;
+            } else if (odds < Constant.GAME_ITEM_PROPERTY_SAME_ODDS) {
+                Log.d(TAG, "newGameItem: @@@生成同类特殊图标！！！===================");
+                property = Constant.GAME_ITEM_PROPERTY_SAME;
+            }
         }
 
         return new GameItem(Constant.GAME_ITEM_SHOW_TYPE_NORMAL, x, y, i, property, mPersonNameList[i], mPersonImageArray.getResourceId(i, 0));

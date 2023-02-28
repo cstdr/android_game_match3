@@ -14,9 +14,19 @@
         android:layout_height="40dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="140dp"
         android:background="@drawable/btn_bg"
         android:text="2分钟模式" />
+
+    <Button
+        android:id="@+id/btn_time_property_mode"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="90dp"
+        android:background="@drawable/btn_bg"
+        android:text="2分钟爆炸模式" />
 
     <Button
         android:id="@+id/btn_infinite_mode"
@@ -24,7 +34,7 @@
         android:layout_height="40dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="40dp"
         android:background="@drawable/btn_bg"
         android:text="无限时间模式" />
 </RelativeLayout>

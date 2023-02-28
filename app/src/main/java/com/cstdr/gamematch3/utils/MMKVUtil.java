@@ -19,4 +19,7 @@ public class MMKVUtil {
     public static final int MODE_TIME_COUNTDOWN = 120;
     public static final int MODE_INFINITE = 1;
 
+    public static final int MODE_TIME_PROPERTY = 2;
+
+
 }

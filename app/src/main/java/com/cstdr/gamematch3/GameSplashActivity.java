@@ -18,6 +18,8 @@ public class GameSplashActivity extends AppCompatActivity {
     private Button mBtnTimeMode;
     private Button mBtnInfiniteMode;
 
+    private Button mBtnPropertyMode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +34,7 @@ public class GameSplashActivity extends AppCompatActivity {
     private void initView() {
         mBtnTimeMode = findViewById(R.id.btn_time_mode);
         mBtnInfiniteMode = findViewById(R.id.btn_infinite_mode);
+        mBtnPropertyMode = findViewById(R.id.btn_time_property_mode);
     }
 
     private void initData() {
@@ -44,6 +47,12 @@ public class GameSplashActivity extends AppCompatActivity {
         mBtnInfiniteMode.setOnClickListener(v -> {
             Intent intent = new Intent(mContext, GameActivity.class);
             intent.putExtra(MMKVUtil.KEY_MODE, MMKVUtil.MODE_INFINITE);
+            startActivity(intent);
+        });
+
+        mBtnPropertyMode.setOnClickListener(v -> {
+            Intent intent = new Intent(mContext, GameActivity.class);
+            intent.putExtra(MMKVUtil.KEY_MODE, MMKVUtil.MODE_TIME_PROPERTY);
             startActivity(intent);
         });
     }
