@@ -202,6 +202,7 @@ public class GameActivity extends AppCompatActivity {
             return true;
         }
     });
+    private int mGameItemWidth;
 
 
     @Override
@@ -213,6 +214,8 @@ public class GameActivity extends AppCompatActivity {
         if (intent != null) {
             mGameMode = intent.getIntExtra(MMKVUtil.KEY_MODE, 0);
         }
+
+        mGameItemWidth = QMUIDisplayHelper.dp2px(mContext, (int) (Constant.GAME_ITEM_WIDTH / Constant.GAME_ITEM_COLUMN_COUNT * 8));
 
         initView();
         initAnimation();
@@ -508,8 +511,8 @@ public class GameActivity extends AppCompatActivity {
                 RelativeLayout layout;
                 if (child == null) {
                     layout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.item_person, null);
-                    int px = QMUIDisplayHelper.dp2px(this, Constant.GAME_ITEM_WIDTH);
-                    layout.setLayoutParams(new RelativeLayout.LayoutParams(px, px));
+//                    int px = QMUIDisplayHelper.dp2px(this, Constant.GAME_ITEM_WIDTH);
+                    layout.setLayoutParams(new RelativeLayout.LayoutParams(mGameItemWidth, mGameItemWidth));
                     mGlGameBoard.addView(layout, position);
                     mListItemLayouts.add(layout);
                 } else {
