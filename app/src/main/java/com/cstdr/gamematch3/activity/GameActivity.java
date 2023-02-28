@@ -162,8 +162,8 @@ public class GameActivity extends AppCompatActivity {
             String timeStr = TimeUtil.getTimeStr(mCountdown);
             mTvTimeNumber.setText(timeStr);
             if (mCountdown <= 0) {
-                if (MMKVUtil.GAME_SCORE_NUMBER > MMKVUtil.GAME_HIGHEST_SCORE_NUMBER) {
-                    MMKVUtil.GAME_HIGHEST_SCORE_NUMBER = MMKVUtil.GAME_SCORE_NUMBER;
+                if (MMKVUtil.GAME_SCORE_NUMBER > MMKVUtil.getCurrentModeHighestScoreNumber()) {
+                    MMKVUtil.saveCurrentModeHighestScoreNumber(MMKVUtil.GAME_SCORE_NUMBER);
 
                     // TODO 游戏结束时超过最高分发生音效
                     SoundPoolUtil.playSuccess();
@@ -464,11 +464,10 @@ public class GameActivity extends AppCompatActivity {
      * 清除游戏数据
      */
     private void clearGameData() {
-        if (MMKVUtil.GAME_SCORE_NUMBER > MMKVUtil.GAME_HIGHEST_SCORE_NUMBER) {
-            MMKVUtil.GAME_HIGHEST_SCORE_NUMBER = MMKVUtil.GAME_SCORE_NUMBER;
+        if (MMKVUtil.GAME_SCORE_NUMBER > MMKVUtil.getCurrentModeHighestScoreNumber()) {
+            MMKVUtil.saveCurrentModeHighestScoreNumber(MMKVUtil.GAME_SCORE_NUMBER);
         }
         MMKVUtil.GAME_SCORE_NUMBER = 0;
-        MMKV.defaultMMKV().putInt(MMKVUtil.KEY_GAME_HIGHEST_SCORE_NUMBER, MMKVUtil.GAME_HIGHEST_SCORE_NUMBER);
 
         countdownHandler.removeMessages(0);
         scoreHandler.removeMessages(0);

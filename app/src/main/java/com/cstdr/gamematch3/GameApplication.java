@@ -19,7 +19,8 @@ public class GameApplication extends Application {
         Log.d(TAG, "onCreate: ========");
         MMKV.initialize(this);
 
-        MMKVUtil.GAME_HIGHEST_SCORE_NUMBER = MMKV.defaultMMKV().getInt(MMKVUtil.KEY_GAME_HIGHEST_SCORE_NUMBER, 0);
+        MMKVUtil.GAME_MODE_TIME_HIGHEST_SCORE_NUMBER = MMKV.defaultMMKV().getInt(MMKVUtil.KEY_GAME_MODE_TIME_HIGHEST_SCORE_NUMBER, 0);
+        MMKVUtil.GAME_MODE_PROPERTY_HIGHEST_SCORE_NUMBER = MMKV.defaultMMKV().getInt(MMKVUtil.KEY_GAME_MODE_PROPERTY_HIGHEST_SCORE_NUMBER, 0);
 
         SoundPoolUtil.initSoundPool(this);
     }
