@@ -4,7 +4,7 @@
 
 ## 体验地址
 
-[小游戏下载体验地址](https://github.com/cstdr/android_game_match3/blob/3ac91d6dadb92cdd011de09a618ef2c0a7f20243/app/release/app-release.apk)
+[小游戏下载体验地址](https://github.com/cstdr/android_game_match3/blob/main/app/release/app-release.apk?raw=true)
 
 ## 项目截图
 ![](https://github.com/cstdr/android_game_match3/blob/main/%E7%B4%A0%E6%9D%90/pic_cover.png?raw=true)
@@ -38,4 +38,8 @@
 11. 【完成】增加角色音效。（增加体验感的重点）
 12. 增加连续三消的连击效果和积分增加。（增加体验感的重点）
 13. 尝试下Taptap的开发者包接入。
+
+14.【完成】增加特殊属性图标，横向、纵向、同类图标三消效果。
+
+15.【完成】增加三消和倒计时音效。
 
